@@ -1,7 +1,7 @@
 http-sniffer
 ==========
 
-[![Build Status](https://travis-ci.org/caesar0301/http-sniffer.svg)](https://travis-ci.org/caesar0301/http-sniffer)
+This is a modified version of the original code; in this repository, we escape Ethernet header processing.
 
 A multi-threading tool to sniff HTTP header records beyond TCP flow statistics.
 
