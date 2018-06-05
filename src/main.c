@@ -60,15 +60,20 @@ packet_preprocess(const char *raw_data, const struct pcap_pkthdr *pkthdr)
 	pkt->raw_len = pkthdr->caplen;
 
 	/* Parse ethernet header and check IP payload */
-	eth_hdr = packet_parse_ethhdr(cp);
+	/*
+    eth_hdr = packet_parse_ethhdr(cp);
 	if(eth_hdr->ether_type != 0x0800){
-		free_ethhdr(eth_hdr);
+		printf("%4X\n", eth_hdr->ether_type);
+        free_ethhdr(eth_hdr);
 		packet_free(pkt);
+        
 		return NULL;
 	}
+    */
+    // printf("this shouldn't be printed");
 
 	/* Parse IP header and check TCP payload */
-	cp = cp + sizeof(ethhdr);
+	cp = cp ;//+ sizeof(ethhdr);
 	ip_hdr = packet_parse_iphdr(cp);
 	pkt->saddr = ip_hdr->saddr;
 	pkt->daddr = ip_hdr->daddr;
@@ -76,7 +81,7 @@ packet_preprocess(const char *raw_data, const struct pcap_pkthdr *pkthdr)
 	pkt->ip_tol = ip_hdr->tot_len;
 	pkt->ip_pro = ip_hdr->protocol;
 	if(pkt->ip_pro != 0x06){
-		free_ethhdr(eth_hdr);
+		// free_ethhdr(eth_hdr);
 		free_iphdr(ip_hdr);
 		packet_free(pkt);
 		return NULL;
@@ -99,8 +104,9 @@ packet_preprocess(const char *raw_data, const struct pcap_pkthdr *pkthdr)
 	   We only consider normal HTTP traffic without encryption */
 	if( !(tcp_hdr->th_sport == 80 || tcp_hdr->th_dport == 80 || \
 		tcp_hdr->th_sport == 8080 || tcp_hdr->th_dport == 8080 || \
-		tcp_hdr->th_sport == 8000 || tcp_hdr->th_dport == 8000)){
-		free_ethhdr(eth_hdr);
+		tcp_hdr->th_sport == 8000 || tcp_hdr->th_dport == 8000 || \
+        tcp_hdr->th_sport == 443 || tcp_hdr->th_dport == 443)){
+		// free_ethhdr(eth_hdr);
 		free_iphdr(ip_hdr);
 		free_tcphdr(tcp_hdr);
 		packet_free(pkt);
@@ -144,7 +150,7 @@ packet_preprocess(const char *raw_data, const struct pcap_pkthdr *pkthdr)
 		pkt->tcp_odata = NULL;
 		pkt->tcp_data = pkt->tcp_odata;
 	}
-	free_ethhdr(eth_hdr);
+	// free_ethhdr(eth_hdr);
 	free_iphdr(ip_hdr);
 	free_tcphdr(tcp_hdr);
 	return pkt;
@@ -207,7 +213,7 @@ process_flow_queue(const char* dump_file){
 
 				file_name = file_name_buf;
 			}
-
+            // printf("%s", file_name);
 			save_flow_json(flow, file_name);
 
 			flow_print(flow);
@@ -274,6 +280,7 @@ capture_main(const char* interface, void (*pkt_handler)(void*), int livemode){
 			packet = packet_preprocess(raw, &pkthdr);
 			if( NULL != packet ){
 				pkt_handler(packet);
+				// printf("got something...");
 			}
 		} else if ( livemode==0 ) {
 			GP_CAP_FIN = 1;
